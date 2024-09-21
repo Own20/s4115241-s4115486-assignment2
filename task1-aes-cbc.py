@@ -1,3 +1,8 @@
+# Q1. (13 marks) Read the following and answer the question that follows:
+# You want to share a file (task1.txt) with your friend securely over untrusted internet. You want to ensure only your friend can see it in the end and no one else.
+# Write a program in Python (task1-aes-cbc.py) that will use symmetric encryption using AES CBC mode to generate the secret key and perform encryption and decryption of this text file.
+# Requirements: The program must display the key, encrypted and decrypted output to the user. The decrypted output must be stored in a separate file. All the file paths must use the BASE variable to # make the code work on all operating systems.
+
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes, padding
@@ -6,8 +11,8 @@ import os
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 inputPath = os.path.join(BASE, 'input', 'task1.txt')
-encryptedPath = os.path.join(BASE, 'out', 'out1_enc')
-decryptedPath = os.path.join(BASE, 'out', 'out1_dec')
+encryptedPath = os.path.join(BASE, 'output', 'task1_enc')
+decryptedPath = os.path.join(BASE, 'output', 'task1_dec')
 
 def encryptFile(inputFilePath, outputFilePath, password):
     salt = os.urandom(16)
@@ -40,7 +45,7 @@ def decryptFile (inputFilePath, outputFilePath, password):
         salt = i.read(16)
         iv = i.read(16)
         ciphertext = i.read()
-    
+        
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
