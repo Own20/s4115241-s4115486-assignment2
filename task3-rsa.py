@@ -1,34 +1,83 @@
+"""
+Q3. (9 marks) Write a program in Python (task3-rsa.py) that does the following:
+i. Generates keys (1024-bit). Keys must be stored in separate files.
+ii. Encrypt the provided plaintext file (task3.txt) using RSA with padding
+iii. Add support for RSA digital signatures: implement a function to sign messages with the private key and verify signatures with the public key.
+iv. Decrypt the ciphertext to arrive at the original plaintext. Save the decrypted output to a separate file.
+v. Extend the program to add support for a bigger key size (2048-bit) and measure how the encryption and decryption time scales as compared to a 1024-bit key.
+All the file paths must use the BASE variable to make the code work on all operating systems.
+"""
+
 # P7 rsa_with_signature.py
+# week 6
+# P7 rsa_padding_file.py
 # week 6
 
 import os
+import timeit
 from cryptography.hazmat.primitives.asymmetric import rsa, padding, utils
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 
-# a fix for making paths working on all OS
+# A fix for making paths working on all OS
 BASE = os.path.dirname(os.path.abspath(__file__))
 
 # Generate RSA keys
-def generate_keys():
+def generate_keys(key_size):
     # Generate a private RSA key
     private_key = rsa.generate_private_key(
         public_exponent=65537,
-        key_size=2048,
+        key_size=key_size,
     )
     # Derive the public key from the private key
     public_key = private_key.public_key()
     return private_key, public_key
 
+# Save the private and public keys to files
+def save_keys(private_key, public_key, private_key_path, public_key_path):
+    # Save the private key
+    with open(private_key_path, "wb") as private_file:
+        private_file.write(
+            private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption()
+            )
+        )
+
+    # Save the public key
+    with open(public_key_path, "wb") as public_file:
+        public_file.write(
+            public_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+            )
+        )
+
+# Load the private and public keys from files
+def load_keys(private_key_path, public_key_path):
+    with open(private_key_path, "rb") as private_file:
+        private_key = serialization.load_pem_private_key(
+            private_file.read(),
+            password=None
+        )
+    
+    with open(public_key_path, "rb") as public_file:
+        public_key = serialization.load_pem_public_key(
+            public_file.read()
+        )
+    
+    return private_key, public_key
+
 # Encrypt the file
 def encrypt_file(file_path, public_key, output_path):
-    # Read the plaintext data from tahe file
+    # Read the plaintext data from the file
     with open(file_path, "rb") as file:
         plaintext = file.read()
 
     # Encrypt the data using OAEP padding
     ciphertext = public_key.encrypt(
-        plaintext.encode('utf-8'), # added encode to convert bytes to string
+        plaintext,
         padding.OAEP(
             mgf=padding.MGF1(algorithm=hashes.SHA256()),
             algorithm=hashes.SHA256(),
@@ -56,7 +105,6 @@ def decrypt_file(encrypted_file_path, private_key, output_path):
         )
     )
 
-    return plaintext.decode('utf-8') # added decode to convert bytes to string
     # Write the decrypted data to the output file
     with open(output_path, "wb") as file:
         file.write(plaintext)
@@ -64,7 +112,7 @@ def decrypt_file(encrypted_file_path, private_key, output_path):
 # Sign the data
 def sign_data(data, private_key):
     signature = private_key.sign(
-        data.encode('utf-8'), # added encode to convert bytes to string
+        data,
         asym_padding.PSS(
             mgf=asym_padding.MGF1(hashes.SHA256()),
             salt_length=asym_padding.PSS.MAX_LENGTH
@@ -78,7 +126,7 @@ def verify_signature(data, signature, public_key):
     try:
         public_key.verify(
             signature,
-            data.encode('utf-8'), # added encode to convert bytes to string
+            data,
             asym_padding.PSS(
                 mgf=asym_padding.MGF1(hashes.SHA256()),
                 salt_length=asym_padding.PSS.MAX_LENGTH
@@ -90,162 +138,58 @@ def verify_signature(data, signature, public_key):
         print(f"Signature verification failed: {e}")
         return False
 
+# Timing the encryption and decryption
+def measure_time_encrypt_decrypt(file_path, private_key, public_key, encrypted_file, decrypted_file):
+    # Time encryption
+    encryption_time = timeit.timeit(lambda: encrypt_file(file_path, public_key, encrypted_file), number=1)
+    
+    # Time decryption
+    decryption_time = timeit.timeit(lambda: decrypt_file(encrypted_file, private_key, decrypted_file), number=1)
+
+    return encryption_time, decryption_time
+
 # Example usage
 if __name__ == "__main__":
-    # Generate keys
-    private_key, public_key = generate_keys()
-
-    # Print private and public keys
-    private_key_pem = private_key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
-    )
-    public_key_pem = public_key.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
-    )
-    
-    print("Private Key:\n", private_key_pem.decode('utf-8'))
-    print("Public Key:\n", public_key_pem.decode('utf-8'))
-
     # File paths
-    original_file = os.path.join(BASE, "in", "sensitive.txt")
-    encrypted_file = os.path.join(BASE, "out", "sensitive_enc")
-    decrypted_file = os.path.join(BASE, "out", "sensitive_dec")
-
-    # Encrypt the file
-    encrypt_file(original_file, public_key, encrypted_file)
-
-    # Decrypt the file
-    decrypt_file(encrypted_file, private_key, decrypted_file)
-
-    # Sign the original data
-    with open(original_file, "rb") as file:
-        original_data = file.read()
-    signature = sign_data(original_data, private_key)
-
-    print('─' * 10) 
-
-    # Print the signature
-    print("Signature:\n", signature.hex())
-
-    print('─' * 10) 
+    original_file = os.path.join(BASE, "input", "task3.txt")
+    encrypted_file_1024 = os.path.join(BASE, "output", "task3_enc_1024")
+    decrypted_file_1024 = os.path.join(BASE, "output", "task3_dec_1024")
+    encrypted_file_2048 = os.path.join(BASE, "output", "task3_enc_2048")
+    decrypted_file_2048 = os.path.join(BASE, "output", "task3_dec_2048")
     
+    # Define file paths for keys
+    private_key_path_1024 = os.path.join(BASE, "keys", "task3_private_key_1024.pem")
+    public_key_path_1024 = os.path.join(BASE, "keys", "task3_public_key_1024.pem")
+    private_key_path_2048 = os.path.join(BASE, "keys", "task3_private_key_2048.pem")
+    public_key_path_2048 = os.path.join(BASE, "keys", "task3_public_key_2048.pem")
 
-    # Verify the signature
-    is_valid = verify_signature(original_data, signature, public_key)
-    print(f"Signature valid: {is_valid}")
+    # Generate keys for 1024 bits
+    private_key_1024, public_key_1024 = generate_keys(1024)
 
+    # Save 1024 bits keys
+    save_keys(private_key_1024, public_key_1024, private_key_path_1024, public_key_path_1024)
 
-
-
-
-
-
-import timeit
-start = timeit.timeit()
-end = timeit.timeit()
-
-
-
-# P7 rsa_padding_file.py
-# week 6
-
-import os
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives import hashes
-
-# a fix for making paths working on all OS
-BASE = os.path.dirname(os.path.abspath(__file__))
-
-# Create keys
-def generate_keys():
-    # Generate a private RSA key
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048,
-    )
-    # Derive the public key from the private key
-    public_key = private_key.public_key()
-    return private_key, public_key
-
-# encrypt plaintext file
-def encrypt_file(file_path, public_key, output_path):
-    # Read the plaintext data from the file
-    with open(file_path, "rb") as file:
-        plaintext = file.read()
-
-    # Encrypt the data using OAEP padding 
-    ciphertext = public_key.encrypt(
-        plaintext,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
+    # Measure the time taken for encryption and decryption for 1024 bits
+    encryption_time_1024, decryption_time_1024 = measure_time_encrypt_decrypt(
+        original_file, private_key_1024, public_key_1024, encrypted_file_1024, decrypted_file_1024
     )
 
-    # Write the encrypted data to the specified output file
-    with open(output_path, "wb") as file:
-        file.write(ciphertext)
+    # Generate keys for 2048 bits
+    private_key_2048, public_key_2048 = generate_keys(2048)
 
-# decrypt ciphertext file
-def decrypt_file(encrypted_file_path, private_key, output_path):
-    # Read the encrypted data
-    with open(encrypted_file_path, "rb") as file:
-        ciphertext = file.read()
+    # Save 2048 bits keys
+    save_keys(private_key_2048, public_key_2048, private_key_path_2048, public_key_path_2048)
 
-    # Decrypt the data using OAEP padding
-    plaintext = private_key.decrypt(
-        ciphertext,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
+    # Measure the time taken for encryption and decryption for 2048 bits
+    encryption_time_2048, decryption_time_2048 = measure_time_encrypt_decrypt(
+        original_file, private_key_2048, public_key_2048, encrypted_file_2048, decrypted_file_2048
     )
 
-    # Write the decrypted data back to the specified output file
-    with open(output_path, "wb") as file:
-        file.write(plaintext)
+    # Display results for both key sizes
+    print(f"\nKey Size: 1024 bits")
+    print(f"Time taken for encryption: {encryption_time_1024:.4f} seconds")
+    print(f"Time taken for decryption: {decryption_time_1024:.4f} seconds")
 
-def main():
-    # Generate RSA keys
-    private_key, public_key = generate_keys()
-
-    # Define file paths using BASE for relative paths
-    file_path = os.path.join(BASE, "in", "sensitive.txt")
-    encrypted_file_path = os.path.join(BASE, "out", "sensitive_enc")
-    decrypted_file_path = os.path.join(BASE,  "out", "sensitive_dec")
-
-    # Encrypt and decrypt the file
-    encrypt_file(file_path, public_key, encrypted_file_path)
-    decrypt_file(encrypted_file_path, private_key, decrypted_file_path)
-    print("CHECK INSIDE out FOLDER")
-
-if __name__ == "__main__":
-    main()
-
-
-'''
-
-RATIONALE:
-
-Textbook RSA
-
-- takes a plaintext message m, a public key (e,n) 
-- (that's usually not kept secret) and 
-- creates a ciphertext c = m^e mod n and 
-- can be decrypted with the secret key (d) via m = c^d mod n 
-
-This may leak information. 
-
-For example, if you were using textbook RSA to send a simple 
-message that's one of a few options  (e.g., it's a yes/no message 
-or an order to buy X shares of a stock), an attacker could just encrypt
-all the likely messages with public key and see which 
-one exactly matches the true ciphertext.
-
-
-'''
+    print(f"\nKey Size: 2048 bits")
+    print(f"Time taken for encryption: {encryption_time_2048:.4f} seconds")
+    print(f"Time taken for decryption: {decryption_time_2048:.4f} seconds")
