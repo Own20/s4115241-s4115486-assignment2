@@ -1,8 +1,3 @@
-# Q6. (5 marks) Encrypted messages can indeed be hidden inside an image using a technique called steganography.
-# Steganography allows cybersecurity professionals to conceal information within other seemingly innocuous data, such as images, audio files, or even text. 
-# When applied to images, this process involves embedding encrypted or hidden data into the image in such a way that the image itself appears unchanged to the human eye.
-# Write a program in Python (task6-hide-and-seek.py) that encrypts a message using AES and embeds the message in a jpeg file using LBS or metadata steganography techniques. The program can then decrypt and reveal this secret message as well.
-
 import os
 import base64
 from Crypto.Cipher import AES
@@ -37,6 +32,25 @@ def binary_to_text(binary_data):
     all_bytes = [binary_data[i:i+8] for i in range(0, len(binary_data), 8)]
     decoded_data = ''.join([chr(int(byte, 2)) for byte in all_bytes])
     return decoded_data
+
+# # Embedding binary data into image using LSB
+# def embed_message_lsb(image_path, binary_message, output_image_path):
+#     img = Image.open(image_path)
+#     pixels = np.array(img)
+
+#     flat_pixels = pixels.flatten()
+    
+#     binary_index = 0
+#     message_length = len(binary_message)
+
+#     for i in range(len(flat_pixels)):
+#         if binary_index < message_length:
+#             flat_pixels[i] = (flat_pixels[i] & ~1) | int(binary_message[binary_index])
+#             binary_index += 1
+    
+#     img_with_message = flat_pixels.reshape(pixels.shape)
+#     img_with_message = Image.fromarray(img_with_message.astype(np.uint8))
+#     img_with_message.save(output_image_path)
 
 # Embedding binary data into image using LSB
 def embed_message_lsb(image_path, binary_message, output_image_path):
@@ -73,6 +87,19 @@ def embed_message_lsb(image_path, binary_message, output_image_path):
     img_with_message = Image.fromarray(img_with_message.astype(np.uint8))
     img_with_message.save(output_image_path)
 
+# # Extracting binary data from image
+# def extract_message_lsb(image_path, message_length):
+#     img = Image.open(image_path)
+#     pixels = np.array(img)
+    
+#     flat_pixels = pixels.flatten()
+#     binary_message = ''
+    
+#     for i in range(message_length * 8):  # Each character is 8 bits
+#         binary_message += str(flat_pixels[i] & 1)
+    
+#     return binary_message
+
 # Extracting binary data from image
 def extract_message_lsb(image_path, message_length):
     img = Image.open(image_path)
@@ -97,6 +124,7 @@ def extract_message_lsb(image_path, message_length):
         print(f"Pixel {change[0]}: {change[1]} -> Extracted Bit: {change[2]}")
 
     return binary_message
+
 
 def main():
     # Paths

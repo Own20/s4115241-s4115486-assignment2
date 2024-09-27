@@ -72,17 +72,17 @@ def main():
     plain_text_path = os.path.join(BASE, "input", "task1.txt")
     encrypted_file_path = os.path.join(BASE, "output", "task6_enc")
     decrypted_file_path = os.path.join(BASE, "output", "task6_dec")
-    private_key_path = os.path.join(BASE, "keys", "task6_private_key.pem")
+    key_path = os.path.join(BASE, "keys", "task6_key.pem")
     public_key_path = os.path.join(BASE, "keys", "task6_public_key.pem")
     
     # Image paths
-    image_path = os.path.join(BASE, "input", "input_image.png")
+    image_path = os.path.join(BASE, "input", "task6_input_image.png")
     output_image_path = os.path.join(BASE, "output", "task6_output_image.png")
 
     # Generate a key and save it to a file
     key = generate_key()
-    save_key_to_file(key, private_key_path)
-    print(f"Encryption Key saved to {private_key_path}")
+    save_key_to_file(key, key_path)
+    print(f"Encryption Key saved to {key_path}")
 
     # Encrypt the message from the text file
     encrypted_message = encrypt_message(plain_text_path, key)

@@ -8,8 +8,7 @@ The RSA keys and decrypted files must be stored in separate files.
 RSA must be used with padding; in other words, textbook RSA is not allowed.
 """
 
-# L7 hybrid_crypto.py
-# HARUSNYA UDAH BERES
+
 
 # Import required libraries necessary for the program
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -174,13 +173,18 @@ with open(decrypted_file_path, "wb") as file:
 print("Decrypted Message path:", decrypted_file_path)
 if decrypted_message == message:
     print('─' * 20)
-    print("!!!Decrypted message matches the Plaintext Message!!!")
+    print("Decrypted message matches the Plaintext Message!!")
     print('─' * 20)
     print("Decrypted Message:", decrypted_message)
+    print('─' * 20)
 else:
+    print('─' * 20)
     print("Decrypted message mismatch from the Plaintext Message")
+    print('─' * 20)
     print("Plaintext Message:", message)
+    print('─' * 20)
     print("Decrypted Message:", decrypted_message)
+    print('─' * 20)
 
 
 
@@ -189,6 +193,6 @@ References:
 Some of the code is used from previous practicals.
 The code from line 32 to 40 and 46 to 47 is used from Practical on Week 5, file named "aes_cbc_file.py" from line 64 to 70, and reexplained in Practical on Week 7, file named "aes_cbc_file.py" from line 62 to 68.
 The code from line 30 to 96 is used from Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
-The code from line 99 to 183 is adapted from Lectorial on Week 7, file named "hybrid_crypto.py" from line 67 to 82, and reexplained in Practical on Week 8, file named "hybrid_crypto_file.py" from line 77 to 121. This file is made during the practical session.
+The code from line 99 to 188 is adapted from Lectorial on Week 7, file named "hybrid_crypto.py" from line 67 to 82, and reexplained in Practical on Week 8, file named "hybrid_crypto_file.py" from line 77 to 121. This file is made during the practical session.
 The rest of the code is explained in the comments.
 """

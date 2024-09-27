@@ -60,8 +60,11 @@ decrypt_file(ciphertext_hex, key_hex, output_file_path)
 with open(BASE + '/output/task2_dec', 'r') as f:
     decryptext = f.read()
     if decryptext == plaintext:
+        print('─' * 20)
         print("Decryption successful.")
+        print('─' * 20)
         print("Decrypted output:", decryptext)
+        print('─' * 20)
     else:
         print("Decryption failed.")
 
