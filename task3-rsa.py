@@ -148,48 +148,50 @@ def measure_time_encrypt_decrypt(file_path, private_key, public_key, encrypted_f
 
     return encryption_time, decryption_time
 
-# Example usage
-if __name__ == "__main__":
-    # File paths
-    original_file = os.path.join(BASE, "input", "task3.txt")
-    encrypted_file_1024 = os.path.join(BASE, "output", "task3_enc_1024")
-    decrypted_file_1024 = os.path.join(BASE, "output", "task3_dec_1024")
-    encrypted_file_2048 = os.path.join(BASE, "output", "task3_enc_2048")
-    decrypted_file_2048 = os.path.join(BASE, "output", "task3_dec_2048")
-    
-    # Define file paths for keys
-    private_key_path_1024 = os.path.join(BASE, "keys", "task3_private_key_1024.pem")
-    public_key_path_1024 = os.path.join(BASE, "keys", "task3_public_key_1024.pem")
-    private_key_path_2048 = os.path.join(BASE, "keys", "task3_private_key_2048.pem")
-    public_key_path_2048 = os.path.join(BASE, "keys", "task3_public_key_2048.pem")
 
-    # Generate keys for 1024 bits
-    private_key_1024, public_key_1024 = generate_keys(1024)
+# File paths
+original_file = os.path.join(BASE, "input", "task3.txt")
+encrypted_file_1024 = os.path.join(BASE, "output", "task3_enc_1024")
+decrypted_file_1024 = os.path.join(BASE, "output", "task3_dec_1024")
+encrypted_file_2048 = os.path.join(BASE, "output", "task3_enc_2048")
+decrypted_file_2048 = os.path.join(BASE, "output", "task3_dec_2048")
 
-    # Save 1024 bits keys
-    save_keys(private_key_1024, public_key_1024, private_key_path_1024, public_key_path_1024)
+# Define file paths for keys
+private_key_path_1024 = os.path.join(BASE, "keys", "task3_private_key_1024.pem")
+public_key_path_1024 = os.path.join(BASE, "keys", "task3_public_key_1024.pem")
 
-    # Measure the time taken for encryption and decryption for 1024 bits
-    encryption_time_1024, decryption_time_1024 = measure_time_encrypt_decrypt(
-        original_file, private_key_1024, public_key_1024, encrypted_file_1024, decrypted_file_1024
-    )
+private_key_path_2048 = os.path.join(BASE, "keys", "task3_private_key_2048.pem")
+public_key_path_2048 = os.path.join(BASE, "keys", "task3_public_key_2048.pem")
 
-    # Generate keys for 2048 bits
-    private_key_2048, public_key_2048 = generate_keys(2048)
+# Generate keys for 1024 bits
+private_key_1024, public_key_1024 = generate_keys(1024)
 
-    # Save 2048 bits keys
-    save_keys(private_key_2048, public_key_2048, private_key_path_2048, public_key_path_2048)
+# Save 1024 bits keys
+save_keys(private_key_1024, public_key_1024, private_key_path_1024, public_key_path_1024)
 
-    # Measure the time taken for encryption and decryption for 2048 bits
-    encryption_time_2048, decryption_time_2048 = measure_time_encrypt_decrypt(
-        original_file, private_key_2048, public_key_2048, encrypted_file_2048, decrypted_file_2048
-    )
+# Measure the time taken for encryption and decryption for 1024 bits
+encryption_time_1024, decryption_time_1024 = measure_time_encrypt_decrypt(
+    original_file, private_key_1024, public_key_1024, encrypted_file_1024, decrypted_file_1024
+)
 
-    # Display results for both key sizes
-    print(f"\nKey Size: 1024 bits")
-    print(f"Time taken for encryption: {encryption_time_1024:.4f} seconds")
-    print(f"Time taken for decryption: {decryption_time_1024:.4f} seconds")
+# Generate keys for 2048 bits
+private_key_2048, public_key_2048 = generate_keys(2048)
 
-    print(f"\nKey Size: 2048 bits")
-    print(f"Time taken for encryption: {encryption_time_2048:.4f} seconds")
-    print(f"Time taken for decryption: {decryption_time_2048:.4f} seconds")
+# Save 2048 bits keys
+save_keys(private_key_2048, public_key_2048, private_key_path_2048, public_key_path_2048)
+
+# Measure the time taken for encryption and decryption for 2048 bits
+encryption_time_2048, decryption_time_2048 = measure_time_encrypt_decrypt(
+    original_file, private_key_2048, public_key_2048, encrypted_file_2048, decrypted_file_2048
+)
+
+# Display results for both key sizes
+print('─' * 20)
+print(f"Key Size: 1024 bits")
+print(f"Time taken for encryption: {encryption_time_1024:.4f} seconds")
+print(f"Time taken for decryption: {decryption_time_1024:.4f} seconds")
+print('─' * 20)
+print(f"Key Size: 2048 bits")
+print(f"Time taken for encryption: {encryption_time_2048:.4f} seconds")
+print(f"Time taken for decryption: {decryption_time_2048:.4f} seconds")
+print('─' * 20)

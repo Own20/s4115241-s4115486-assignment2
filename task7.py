@@ -103,7 +103,7 @@ def main():
     encrypted_file_path = os.path.join(BASE, "output", "task7_enc")
     decrypted_file_path = os.path.join(BASE, "output", "task7_dec")
     aes_key_path = os.path.join(BASE, "keys", "task7_aes_key.pem")
-    image_path = os.path.join(BASE, "input", "task6_input_image.png")
+    image_path = os.path.join(BASE, "input", "task6_input_image_png.png")
     output_image_path = os.path.join(BASE, "output", "task7_stego_image.png")
     
     # Message

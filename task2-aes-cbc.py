@@ -62,7 +62,6 @@ with open(BASE + '/output/task2_dec', 'r') as f:
     if decryptext == plaintext:
         print('─' * 20)
         print("Decryption successful.")
-        print('─' * 20)
         print("Decrypted output:", decryptext)
         print('─' * 20)
     else:

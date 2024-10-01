@@ -31,6 +31,14 @@ def encryptFile(inputFilePath, outputFilePath, password):
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
 
+<<<<<<< HEAD
+=======
+    print('─' * 20)
+    print("Key : ")
+    print(key)
+    print('─' * 20)
+
+>>>>>>> 87479aa070b57ba8f2d2523880dd17593ace84e4
     with open(inputFilePath, 'rb') as i:
         plaintext = i.read()
 
@@ -41,6 +49,13 @@ def encryptFile(inputFilePath, outputFilePath, password):
 
     with open(outputFilePath, 'wb') as j:
         j.write(salt + iv + cipherText)
+<<<<<<< HEAD
+=======
+    
+    print("Encrypted : ")
+    print(salt + iv + cipherText)
+    print('─' * 20)
+>>>>>>> 87479aa070b57ba8f2d2523880dd17593ace84e4
 
     return key, (salt + iv + cipherText)
 
@@ -68,6 +83,13 @@ def decryptFile(inputFilePath, outputFilePath, password):
 
     with open(outputFilePath, 'wb') as j:
         j.write(plaintext)
+<<<<<<< HEAD
+=======
+    
+    print("Decrypted : ")
+    print(plaintext)
+    print('─' * 20)
+>>>>>>> 87479aa070b57ba8f2d2523880dd17593ace84e4
 
     return plaintext
 
