@@ -69,8 +69,10 @@ def rsa_keygen(bits=16):
     n = p * q
     phi_n = (p - 1) * (q - 1)
 
+    print('─' * 20)
     print(f"Generated primes: p={p}, q={q}")
     print(f"n={n}, phi(n)={phi_n}")
+    print('─' * 20)
 
     # Choose a random e such that 1 < e < phi(n) and gcd(e, phi(n)) == 1
     e = random.randrange(2, phi_n)
@@ -105,28 +107,29 @@ def rsa_decrypt(cipher, private_key):
         raise ValueError("Decryption failed: message was not properly encoded or padded")
     return decrypted_message
 
-# Example usage
-if __name__ == "__main__":
-    # Input message (student number without 's')
-    message = "4115241"
-    
-    # Generate RSA keys with larger prime numbers (e.g., 32 bits instead of 16)
-    public_key, private_key = rsa_keygen(bits=32)
-    
-    print(f"Public Key: {public_key}")
-    print(f"Private Key: {private_key}")
-    
-    # Encrypt the message
-    cipher = rsa_encrypt(message, public_key)
-    print(f"Encrypted message: {cipher}")
-    
-    # Decrypt the message
-    decrypted_message = rsa_decrypt(cipher, private_key)
-    print(f"Decrypted message: {decrypted_message}")
+# Input message (student number without 's')
+message = "4115241"
 
-    # Save the encrypted message to a file
-    with open(BASE + '/output/task5_enc', 'w') as f:
-        f.write(str(cipher))
-    # Save the decrypted message to a file
-    with open(BASE + '/output/task5_dec', 'w') as f:
-        f.write(decrypted_message)
+# Generate RSA keys with larger prime numbers (e.g., 32 bits instead of 16)
+public_key, private_key = rsa_keygen(bits=32)
+
+print(f"Public Key: {public_key}")
+print(f"Private Key: {private_key}")
+print('─' * 20)
+
+# Encrypt the message
+cipher = rsa_encrypt(message, public_key)
+print(f"Encrypted message: {cipher}")
+print('─' * 20)
+
+# Decrypt the message
+decrypted_message = rsa_decrypt(cipher, private_key)
+print(f"Decrypted message: {decrypted_message}")
+print('─' * 20)
+
+# Save the encrypted message to a file
+with open(BASE + '/output/task5_enc', 'w') as f:
+    f.write(str(cipher))
+# Save the decrypted message to a file
+with open(BASE + '/output/task5_dec', 'w') as f:
+    f.write(decrypted_message)
