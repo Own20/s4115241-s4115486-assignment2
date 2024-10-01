@@ -5,8 +5,6 @@ Write a program in Python (task1-aes-cbc.py) that will use symmetric encryption 
 Requirements: The program must display the key, encrypted and decrypted output to the user. The decrypted output must be stored in a separate file. All the file paths must use the BASE variable to # make the code work on all operating systems.
 """
 
-
-
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes, padding
@@ -26,15 +24,12 @@ def encryptFile(inputFilePath, outputFilePath, password):
         salt=salt,
         iterations=100000,
         backend=default_backend()
-        )
+    )
     key = kdf.derive(password.encode())
-    # print(key)
+
     iv = os.urandom(16)
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
-
-    print("Key : ")
-    print(key)
 
     with open(inputFilePath, 'rb') as i:
         plaintext = i.read()
@@ -46,16 +41,15 @@ def encryptFile(inputFilePath, outputFilePath, password):
 
     with open(outputFilePath, 'wb') as j:
         j.write(salt + iv + cipherText)
-    
-    print("Encrypted : ")
-    print(salt + iv + cipherText)
 
-def decryptFile (inputFilePath, outputFilePath, password):
+    return key, (salt + iv + cipherText)
+
+def decryptFile(inputFilePath, outputFilePath, password):
     with open(inputFilePath, 'rb') as i:
         salt = i.read(16)
         iv = i.read(16)
         ciphertext = i.read()
-        
+
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -74,9 +68,19 @@ def decryptFile (inputFilePath, outputFilePath, password):
 
     with open(outputFilePath, 'wb') as j:
         j.write(plaintext)
-    
-    print("Decrypted : ")
-    print(plaintext)
 
-encryptFile(inputPath, encryptedPath, 'password')
-decryptFile(encryptedPath, decryptedPath, 'password')
+    return plaintext
+
+# Example usage
+key, encrypted_data = encryptFile(inputPath, encryptedPath, 'password')
+decrypted_data = decryptFile(encryptedPath, decryptedPath, 'password')
+
+# Print key, encrypted and decrypted data
+print("Key : ")
+print(key)
+
+print("Encrypted : ")
+print(encrypted_data)
+
+print("Decrypted : ")
+print(decrypted_data)
