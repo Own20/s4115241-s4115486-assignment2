@@ -5,7 +5,8 @@ import os
 
 #for making paths working on all OS
 BASE = os.path.dirname(os.path.abspath(__file__))
-
+encryptedPath = os.path.join(BASE, 'output', 'task5_enc')
+decryptedPath = os.path.join(BASE, 'output', 'task5_dec')
 # Square and Multiply algorithm for fast modular exponentiation
 def mod_exp(base, exp, mod):
     result = 1
@@ -111,7 +112,7 @@ decrypted_message = rsa_decrypt(cipher, private_key)
 print(f"Decrypted message: {decrypted_message}")
 
 # Save the encrypted and decrypted messages to files
-with open(BASE + '/output/task5_enc', 'w') as f:
+with open(encryptedPath, 'w') as f:
     f.write(str(cipher))
-with open(BASE + '/output/task5_dec', 'w') as f:
+with open(decryptedPath, 'w') as f:
     f.write(decrypted_message)

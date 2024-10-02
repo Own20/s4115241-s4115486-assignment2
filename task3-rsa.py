@@ -22,6 +22,20 @@ from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 # A fix for making paths working on all OS
 BASE = os.path.dirname(os.path.abspath(__file__))
 
+# File paths
+original_file = os.path.join(BASE, "input", "task3.txt")
+encrypted_file_1024 = os.path.join(BASE, "output", "task3_enc_1024")
+decrypted_file_1024 = os.path.join(BASE, "output", "task3_dec_1024")
+encrypted_file_2048 = os.path.join(BASE, "output", "task3_enc_2048")
+decrypted_file_2048 = os.path.join(BASE, "output", "task3_dec_2048")
+
+# Define file paths for keys
+private_key_path_1024 = os.path.join(BASE, "keys", "task3_private_key_1024.pem")
+public_key_path_1024 = os.path.join(BASE, "keys", "task3_public_key_1024.pem")
+
+private_key_path_2048 = os.path.join(BASE, "keys", "task3_private_key_2048.pem")
+public_key_path_2048 = os.path.join(BASE, "keys", "task3_public_key_2048.pem")
+
 # Generate RSA keys
 def generate_keys(key_size):
     # Generate a private RSA key
@@ -36,6 +50,7 @@ def generate_keys(key_size):
 # Save the private and public keys to files
 def save_keys(private_key, public_key, private_key_path, public_key_path):
     # Save the private key
+    # print ("save keys ", private_key, public_key)
     with open(private_key_path, "wb") as private_file:
         private_file.write(
             private_key.private_bytes(
@@ -147,21 +162,6 @@ def measure_time_encrypt_decrypt(file_path, private_key, public_key, encrypted_f
     decryption_time = timeit.timeit(lambda: decrypt_file(encrypted_file, private_key, decrypted_file), number=1)
 
     return encryption_time, decryption_time
-
-
-# File paths
-original_file = os.path.join(BASE, "input", "task3.txt")
-encrypted_file_1024 = os.path.join(BASE, "output", "task3_enc_1024")
-decrypted_file_1024 = os.path.join(BASE, "output", "task3_dec_1024")
-encrypted_file_2048 = os.path.join(BASE, "output", "task3_enc_2048")
-decrypted_file_2048 = os.path.join(BASE, "output", "task3_dec_2048")
-
-# Define file paths for keys
-private_key_path_1024 = os.path.join(BASE, "keys", "task3_private_key_1024.pem")
-public_key_path_1024 = os.path.join(BASE, "keys", "task3_public_key_1024.pem")
-
-private_key_path_2048 = os.path.join(BASE, "keys", "task3_private_key_2048.pem")
-public_key_path_2048 = os.path.join(BASE, "keys", "task3_public_key_2048.pem")
 
 # Generate keys for 1024 bits
 private_key_1024, public_key_1024 = generate_keys(1024)
