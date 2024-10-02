@@ -8,8 +8,6 @@ The RSA keys and decrypted files must be stored in separate files.
 RSA must be used with padding; in other words, textbook RSA is not allowed.
 """
 
-
-
 # Import required libraries necessary for the program
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
@@ -17,7 +15,6 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import padding as sym_padding
-from cryptography.hazmat.backends import default_backend
 from base64 import b64encode
 from os import urandom
 import os
@@ -31,7 +28,6 @@ def generate_rsa_keys():
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
-        backend=default_backend()
     )
 
     # Get the public key from the private key
@@ -47,7 +43,7 @@ def encrypt_message(message, public_key):
     iv = urandom(16)
 
     # Encrypt the message with AES
-    cipher = Cipher(algorithms.AES(symmetric_key), modes.CFB(iv), backend=default_backend())
+    cipher = Cipher(algorithms.AES(symmetric_key), modes.CFB(iv))
     encryptor = cipher.encryptor()
 
     # Pad the message with PKCS7 padding
@@ -66,7 +62,7 @@ def encrypt_message(message, public_key):
             label=None
         )
     )
-    
+
     # Return the encrypted message, IV, and encrypted key
     return encrypted_message, iv, encrypted_key
 
@@ -83,7 +79,7 @@ def decrypt_message(encrypted_message, iv, encrypted_key, private_key):
     )
 
     # Decrypt the message using AES
-    cipher = Cipher(algorithms.AES(symmetric_key), modes.CFB(iv), backend=default_backend())
+    cipher = Cipher(algorithms.AES(symmetric_key), modes.CFB(iv))
     decryptor = cipher.decryptor()
 
     # Decrypt the encrypted message and remove the padding
@@ -118,7 +114,7 @@ with open(public_key_path, "wb") as file:
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     ))
 
-# Open Display the RSA keys
+# Open and display the RSA keys
 with open(private_key_path, "r") as file:
     private_key_disp = file.read()
 with open(public_key_path, "r") as file:
@@ -140,11 +136,9 @@ with open(plain_text_path, "r") as file:
 # Encrypt the message
 encrypted_message, iv, encrypted_key = encrypt_message(message, public_key)
 
-# Save the encrypted message to a file
+# Save the encrypted message and key to a file
 with open(encrypted_file_path, "wb") as file:
     file.write(encrypted_message)
-
-# Save the encrypted key to a file
 with open(encrypted_key_path, "wb") as file:
     file.write(encrypted_key)
 
