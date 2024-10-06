@@ -111,3 +111,10 @@ if extracted_encrypted_message:
     print(f"Decrypted message saved to {decrypted_file_path}")
     print('─' * 20)
 
+# choose message to hide
+# encrypt_message
+# hide embed_message
+# read stego
+# find encrypt message
+# decrypt 
+# print message 

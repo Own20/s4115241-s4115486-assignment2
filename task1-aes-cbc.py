@@ -23,7 +23,7 @@ def encryptFile(inputFilePath, outputFilePath, password):
         length=32,
         salt=salt,
         iterations=100000,
-        backend=default_backend()
+        # backend=default_backend()
     )
     key = kdf.derive(password.encode())
 
