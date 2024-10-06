@@ -9,8 +9,6 @@ The decrypted output must be stored in a separate file.
 All the file paths must use the BASE variable to make the code work on all operating systems.
 """
 
-
-
 # Import required libraries necessary for the program
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
