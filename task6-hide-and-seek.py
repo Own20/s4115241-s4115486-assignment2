@@ -272,4 +272,7 @@ https://www.tutorialspoint.com/how-to-find-discrete-cosine-transform-of-an-image
 Convert image from one BGR to RGB 
 https://www.geeksforgeeks.org/python-opencv-cv2-cvtcolor-method/ 
 
+Some of the functions utilise ChatGPT in the making
+https://chatgpt.com/
+
 """
