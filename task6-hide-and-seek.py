@@ -225,7 +225,7 @@ def rebuild_image_from_dct_coefficients(dct_coefficients, channel_shapes, output
     rebuilt_image = cv2.merge(rebuilt_color_channels)
 
     # Save the rebuilt image using the Pillow library to handle image formats like JPEG
-    output_image = Image.fromarray(cv2.cvtColor(rebuilt_image, cv2.COLOR_BGR2RGB))
+    output_image = Image.fromarray(cv2.cvtColor(rebuilt_image, cv2.COLOR_BGR2RGB)) # convert image from BGT to RGB to ensure image are displayed correctly
     output_image.save(output_image_path)
     print(f"Stego image saved to {output_image_path}")
 
@@ -291,8 +291,13 @@ SOME FUNCTIONALITY OF THIS CODE IS DERIVED FROM EXAMPLE CODE OF LECTORIAL 7
 - Functions Referenced: encrypt_message(), decrypt_message()
 - File Referenced: /L7-code/hybrid_crypto.py 
 - Written and Published by Shekhar Kalra on Canvas
-
+Hybrid crypto is utilised in this code and derived from 
+Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
 Splitting multi-channel image
 https://www.geeksforgeeks.org/splitting-and-merging-channels-with-python-opencv/ 
+Getting DCT 
+https://stackoverflow.com/questions/15488700/how-to-get-dct-of-an-image-in-python-using-opencv 
+Convert image from one BGR to RGB 
+https://www.geeksforgeeks.org/python-opencv-cv2-cvtcolor-method/ 
 
 """
