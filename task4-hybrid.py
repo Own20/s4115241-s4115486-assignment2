@@ -192,8 +192,18 @@ else:
 References:
 
 Some of the code is used from previous practicals.
-The code from line 32 to 40 and 46 to 47 is used from Practical on Week 5, file named "aes_cbc_file.py" from line 64 to 70, and reexplained in Practical on Week 7, file named "aes_cbc_file.py" from line 62 to 68.
-The code from line 30 to 96 is used from Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
-The code from line 99 to 188 is adapted from Lectorial on Week 7, file named "hybrid_crypto.py" from line 67 to 82, and reexplained in Practical on Week 8, file named "hybrid_crypto_file.py" from line 77 to 121. This file is made during the practical session.
+The code from line 32 to 40 and 46 to 47 is used from
+Practical on Week 5, file named "aes_cbc_file.py" from line 64 to 70, and reexplained in 
+Practical on Week 7, file named "aes_cbc_file.py" from line 62 to 68.
+
+The code from line 30 to 96 is used from 
+Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in 
+Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
+
+The code from line 99 to 188 is adapted from 
+Lectorial on Week 7, file named "hybrid_crypto.py" from line 67 to 82, and reexplained in 
+Practical on Week 8, file named "hybrid_crypto_file.py" from line 77 to 121. 
+This file is made during the practical session.
+
 The rest of the code is explained in the comments.
 """

@@ -188,6 +188,7 @@ def rebuild_image_from_dct_coefficients(dct_coefficients, channel_shapes, output
     print(f"Stego image saved to {output_image_path}")
 
 
+
 # Define the paths for the input and output images
 input_image_path = os.path.join(BASE, 'input', 'task6_input_image.jpeg')
 output_image_path = os.path.join(BASE, 'output', 'task6_stego_image.jpeg')
@@ -253,7 +254,8 @@ The Discrete Cosine Transform (DCT) steganography mathematical process allows fo
 References:
 
 Hybrid crypto is utilised in this code and derived from 
-Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
+Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in 
+Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
 
 Splitting multi-channel image
 https://www.geeksforgeeks.org/splitting-and-merging-channels-with-python-opencv/ 

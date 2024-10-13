@@ -79,7 +79,9 @@ else:
 References:
 
 Some of the code is used from previous practicals.
-The code from line 32 to 40 and 46 to 47 is used from Practical on Week 5, file named "aes_cbc_file.py" from line 64 to 70, and reexplained in Practical on Week 7, file named "aes_cbc_file.py" from line 62 to 68.
+The code from line 32 to 40 and 46 to 47 is used from 
+Practical on Week 5, file named "aes_cbc_file.py" from line 64 to 70, and reexplained in 
+Practical on Week 7, file named "aes_cbc_file.py" from line 62 to 68.
 
 It is mentioned that the AES decryption is set using CBC mode with PKCS7 padding.
 So, the AES cipher is set up in CBC mode with the IV and key, and a decryptor object is created.

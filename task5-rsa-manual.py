@@ -151,10 +151,16 @@ References:
 
 Miller-Rabin calculation 
 https://www.geeksforgeeks.org/primality-test-set-3-miller-rabin/ 
+
 For the inverse modulo we took some ideas from this 
 https://www.geeksforgeeks.org/multiplicative-inverse-under-modulo-m/ 
+
 To specify bits of generated number
 https://www.w3schools.com/python/ref_random_getrandbits.asp 
+
+Some of the functions utilise ChatGPT in the making
+https://chatgpt.com/
+
 For the general RSA encryption, the steps ideas from the week 2 lectorial slide
 For the add_padding part, chatgpt was utilise to help debug the problem
 
