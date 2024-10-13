@@ -1,25 +1,12 @@
-# Q5. (4 marks) Write a program in python (task5-rsa-manual.py) to manually implement the encryption and decryption of a string message (your student number without the s).
-# You are NOT allowed to use any Python cryptographic libraries.
-# In other words, the task involves generating large prime numbers, computing public and private keys, and using those keys to encrypt and decrypt messages. 
-# Python must do all mathematical calculations without the use of cryptographic libraries.
-# Add the support for padding and improve performance by using fast, modular exponentiation (e.g., square-and-multiply algorithm).
-
-# string message: 4115241
-# generate large prime numbers
-# compute public and private keys
-# encrypt and decrypt messages
-
 import random
 from math import gcd
-import os.path
 import os
 
-#for making paths working on all OS
 BASE = os.path.dirname(os.path.abspath(__file__))
 encryptedPath = os.path.join(BASE, 'output', 'task5_enc')
 decryptedPath = os.path.join(BASE, 'output', 'task5_dec')
 
-# Square and Multiply algorithm for fast modular exponentiation
+# Fast modular exponentiation
 def mod_exp(base, exp, mod):
     result = 1
     base = base % mod
@@ -30,26 +17,34 @@ def mod_exp(base, exp, mod):
         base = (base * base) % mod
     return result
 
-# Function to check if a number is prime
-def is_prime(num):
-    if num <= 1:
-        return False
-    if num == 2 or num == 3:
+# Miller-Rabin primality test for faster prime generation
+def miller_rabin_test(n, k=5):
+    if n == 2 or n == 3:
         return True
-    if num % 2 == 0 or num % 3 == 0:
+    if n <= 1 or n % 2 == 0:
         return False
-    i = 5
-    while i * i <= num:
-        if num % i == 0 or num % (i + 2) == 0:
+    r, d = 0, n - 1
+    while d % 2 == 0:
+        r += 1
+        d //= 2
+    for _ in range(k):
+        a = random.randint(2, n - 2)
+        x = mod_exp(a, d, n)
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(r - 1):
+            x = mod_exp(x, 2, n)
+            if x == n - 1:
+                break
+        else:
             return False
-        i += 6
     return True
 
-# Generate a large random prime number
+# Generate a large random prime number using Miller-Rabin
 def generate_large_prime(bits=16):
     while True:
         num = random.getrandbits(bits)
-        if is_prime(num):
+        if miller_rabin_test(num):
             return num
 
 # Function to compute modular inverse using extended Euclidean algorithm
@@ -64,8 +59,8 @@ def mod_inverse(e, phi):
         raise Exception('Modular inverse does not exist')
     return x % phi
 
-# RSA key generation
-def rsa_keygen(bits=16):
+# RSA key generation with faster prime generation
+def rsa_keygen(bits=64):  # Reduced key size for testing
     p = generate_large_prime(bits)
     q = generate_large_prime(bits)
     n = p * q
@@ -76,44 +71,57 @@ def rsa_keygen(bits=16):
     print(f"n={n}, phi(n)={phi_n}")
     print('─' * 20)
 
-    # Choose a random e such that 1 < e < phi(n) and gcd(e, phi(n)) == 1
     e = random.randrange(2, phi_n)
     while gcd(e, phi_n) != 1:
         e = random.randrange(2, phi_n)
 
-    # Compute the private key d
     d = mod_inverse(e, phi_n)
+    return (e, n), (d, n)
 
-    return (e, n), (d, n)  # (public_key, private_key)
+# Function to pad the message with fixed padding
+def add_padding(message, n_len):
+    message_bytes = message.encode('utf-8')
+    max_message_len = n_len - 11  # Allow some room for padding
+    if len(message_bytes) > max_message_len:
+        raise ValueError("Message too long for the given modulus")
 
-# RSA encryption
+    padded_message = b'\x00' * (max_message_len - len(message_bytes)) + message_bytes
+    return padded_message
+
+# Function to remove padding from the decrypted message
+def remove_padding(padded_message):
+    return padded_message.lstrip(b'\x00').decode('utf-8')
+
+# RSA encryption with padding
 def rsa_encrypt(message, public_key):
     e, n = public_key
-    # Convert the message to an integer
-    message_int = int.from_bytes(message.encode('utf-8'), 'big')
-    # Ensure message is smaller than n
-    if message_int >= n:
-        raise ValueError("Message is too large for the modulus")
+    n_len = (n.bit_length() + 7) // 8  # Length of n in bytes
+
+    print(f"Modulus size (in bytes): {n_len}")
+    print(f"Message size (in bytes): {len(message.encode('utf-8'))}")
+
+    padded_message = add_padding(message, n_len)
+    message_int = int.from_bytes(padded_message, 'big')
+
     cipher = mod_exp(message_int, e, n)
     return cipher
 
-# RSA decryption
+# RSA decryption with unpadding
 def rsa_decrypt(cipher, private_key):
     d, n = private_key
+    n_len = (n.bit_length() + 7) // 8
+
     decrypted_int = mod_exp(cipher, d, n)
-    # Convert the decrypted integer back to bytes, then to string
-    try:
-        decrypted_message = decrypted_int.to_bytes((decrypted_int.bit_length() + 7) // 8, 'big').decode('utf-8')
-    except UnicodeDecodeError:
-        # If there's an error in decoding, handle it here (e.g., improper padding)
-        raise ValueError("Decryption failed: message was not properly encoded or padded")
-    return decrypted_message
+    decrypted_bytes = decrypted_int.to_bytes(n_len, 'big')
+
+    return remove_padding(decrypted_bytes)
 
 # Input message (student number without 's')
 message = "4115241"
 
-# Generate RSA keys with larger prime numbers (e.g., 32 bits instead of 16)
-public_key, private_key = rsa_keygen(bits=32)
+# Generate RSA keys with larger prime numbers (e.g., 128 or 256 bits)
+public_key, private_key = rsa_keygen(bits=128)  # or bits=256 for stronger keys
+
 
 print(f"Public Key: {public_key}")
 print(f"Private Key: {private_key}")
@@ -132,6 +140,7 @@ print('─' * 20)
 # Save the encrypted message to a file
 with open(encryptedPath, 'w') as f:
     f.write(str(cipher))
+
 # Save the decrypted message to a file
 with open(decryptedPath, 'w') as f:
     f.write(decrypted_message)
