@@ -263,6 +263,9 @@ https://pyimagesearch.com/2021/01/23/splitting-and-merging-channels-with-opencv/
 Getting DCT 
 https://stackoverflow.com/questions/15488700/how-to-get-dct-of-an-image-in-python-using-opencv 
 
+More about DCT and IDCT ideas are from
+https://www.tutorialspoint.com/how-to-find-discrete-cosine-transform-of-an-image-using-opencv-python
+
 Convert image from one BGR to RGB 
 https://www.geeksforgeeks.org/python-opencv-cv2-cvtcolor-method/ 
 
