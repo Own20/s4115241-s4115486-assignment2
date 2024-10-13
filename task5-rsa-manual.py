@@ -112,10 +112,10 @@ def rsa_decrypt(cipher, private_key):
     d, n = private_key
     n_len = (n.bit_length() + 7) // 8 # Rounding up for the full byte example : (1023 + 7) // 8 = 128 bytes
 
-    decrypted_int = mod_exp(cipher, d, n)
-    decrypted_bytes = decrypted_int.to_bytes(n_len, 'big')
+    decrypted_int = mod_exp(cipher, d, n) #Decrypting by performing the mod_exp function
+    decrypted_bytes = decrypted_int.to_bytes(n_len, 'big') 
 
-    return remove_padding(decrypted_bytes)
+    return remove_padding(decrypted_bytes) 
 
 # Input message (student number without 's')
 message = "4115241"
