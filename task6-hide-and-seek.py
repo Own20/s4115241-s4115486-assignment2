@@ -243,16 +243,17 @@ print('─' * 20)
 
 
 """
-References:
-
-Hybrid crypto is utilised in this code and derived from 
-Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
-
 The Discrete Cosine Transform (DCT) steganography mathematical process allows for hiding a secret message within an image by manipulating the Discrete Cosine Transform (DCT) coefficients of the image. This technique uses the way JPEG images are compressed and how the human eye perceives changes in image data. The process can be done using these steps:
 - Extract the DCT coefficients from the image's color channels from the spatial domain (the normal pixel values of the image) into the frequency domain (the DCT coefficients). It categorises the image data into different frequencies, with the low-frequency coefficients are ideal for data embedding since small alterations have minimal visual impact.
 - Embed the secret message into the low-frequency DCT coefficients by modifying the least significant bits (LSBs) of the coefficients. This process involves changing the LSBs of the DCT values to encode the message bits without significantly altering the image's appearance. This technique ensures that the hidden message can survive JPEG compression, which tends to remove high-frequency details while retaining low-frequency components.
 - Extract the hidden message from the DCT coefficients by reading the LSBs of the low-frequency DCT values. This process involves decoding the LSBs to recover the embedded message without affecting the image's quality. The effectiveness of this method relies on the ability to recover hidden data from the low-frequency components, which are less likely to change during image processing.
 - Rebuild the image from the modified DCT coefficients by applying the inverse DCT to convert the frequency data back into pixel values. This step merges the color channels to reconstruct the image with the embedded message.
+
+
+References:
+
+Hybrid crypto is utilised in this code and derived from 
+Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
 
 Splitting multi-channel image
 https://www.geeksforgeeks.org/splitting-and-merging-channels-with-python-opencv/ 
