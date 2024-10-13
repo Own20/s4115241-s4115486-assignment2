@@ -75,30 +75,30 @@ def extract_dct_color(image_path):
     image = cv2.imread(image_path)
 
     # Split the image into its color channels (Blue, Green, Red)
-    channels = cv2.split(image)
+    color_channels = cv2.split(image)
     
     # List to store the DCT values for each color channel and the shapes of each channel
     dct_coefficients = []
-    shapes = []
+    channel_shapes  = []
 
     # Go through each color channel (B, G, R) and extract DCT coefficients for each 8x8 block of pixels
-    for channel in channels:
+    for channel in color_channels:
         height, width = channel.shape
-        shapes.append(channel.shape)
+        channel_shapes .append(channel.shape)
         dct_channel = []
 
         for i in range(0, height, 8):
             for j in range(0, width, 8):
-                block = channel[i:i+8, j:j+8]
-                dct_block = cv2.dct(np.float32(block))
+                pixel_block = channel[i:i+8, j:j+8]
+                dct_block = cv2.dct(np.float32(pixel_block ))
                 dct_channel.append(dct_block)
         dct_coefficients.append(np.array(dct_channel))
 
     # Return the DCT coefficients and shapes of the color channels
-    return dct_coefficients, shapes
+    return dct_coefficients, channel_shapes
 
 # Embed the message in the DCT coefficients
-def embed_data_in_dct(dct_coefficients, message):
+def embed_message_in_dct(dct_coefficients, secret_message):
     # Hide a message into the DCT coefficients of an image by altering the least significant bits (LSB) 
     # of the low-frequency DCT values.
 
@@ -115,40 +115,40 @@ def embed_data_in_dct(dct_coefficients, message):
     # survives compression with minimal visual changes or data loss.
 
     # Convert the message to binary format
-    binary_message = ''.join(format(ord(char), '08b') for char in message)
+    binary_secret_message = ''.join(format(ord(char), '08b') for char in secret_message)
 
     # Track the index of the current bit in the message
-    message_idx = 0
+    bit_index  = 0
 
     # Go through each DCT block and modify the least significant bits of the low-frequency DCT values
     for block in dct_coefficients:
-        for coeff_idx in range(1, min(6, len(block.flatten()))):
-            coeff = np.int32(block.flat[coeff_idx])
+        for coeff_index in range(1, min(6, len(block.flatten()))):
+            coeff = np.int32(block.flat[coeff_index])
             
             # Embed the message bits into the least significant bits of the DCT coefficients
-            if message_idx < len(binary_message):
-                if binary_message[message_idx] == '1':
+            if bit_index < len(binary_secret_message):
+                if binary_secret_message[bit_index] == '1':
                     coeff = coeff | 1  # set LSB to 1
                 else:
                     coeff = coeff & ~1  # set LSB to 0
 
                 # Update the DCT coefficient with the embedded bit
-                block.flat[coeff_idx] = np.float32(coeff)
-                message_idx += 1
+                block.flat[coeff_index] = np.float32(coeff)
+                bit_index += 1
 
             # Break if we've embedded the entire message
-            if message_idx >= len(binary_message):
+            if bit_index >= len(binary_secret_message):
                 break
 
         # Break if we've embedded the entire message
-        if message_idx >= len(binary_message):
+        if bit_index >= len(binary_secret_message):
             break
 
     # Return the modified DCT coefficients
     return dct_coefficients
 
 # Extract the hidden message from the DCT coefficients
-def extract_data_from_dct(dct_coefficients, message_length):
+def extract_hidden_message_from_dct(dct_coefficients, secret_message_length):
     # Extract the hidden message by reading the least significant bits (LSBs) of the low-frequency DCT coefficients.
 
     # Since the message is embedded in the least significant bits of the low-frequency DCT values, we can extract it
@@ -159,38 +159,38 @@ def extract_data_from_dct(dct_coefficients, message_length):
     # important visual information that is less likely to be altered during compression or editing.
     
     # List to store the extracted bits and the index of the current bit in the message
-    bits = []
-    message_idx = 0
+    extracted_bits  = []
+    bit_index  = 0
     
     # Go through each DCT block and extract the least significant bits of the low-frequency DCT values
     for block in dct_coefficients:
         # Extract the LSBs from the low-frequency DCT values
-        for coeff_idx in range(1, min(6, len(block.flatten()))):
-            coeff = np.int32(block.flat[coeff_idx])
+        for coeff_index  in range(1, min(6, len(block.flatten()))):
+            coeff = np.int32(block.flat[coeff_index])
             
             # Extract the LSB of the DCT coefficient
-            if message_idx < message_length * 8:
-                bits.append(coeff & 1)
-                message_idx += 1
+            if bit_index < secret_message_length  * 8:
+                extracted_bits.append(coeff & 1)
+                bit_index  += 1
 
             # Break if we've extracted the entire message
-            if message_idx >= message_length * 8:
+            if bit_index  >= secret_message_length  * 8:
                 break
 
         # Break if we've extracted the entire message
-        if message_idx >= message_length * 8:
+        if bit_index  >= secret_message_length  * 8:
             break
 
     # Convert the extracted bits to characters (8 bits to a character)
-    binary_message = ''.join(str(bit) for bit in bits)
-    message = ''.join(chr(int(binary_message[i:i+8], 2)) for i in range(0, len(binary_message), 8))
+    binary_message = ''.join(str(bit) for bit in extracted_bits)
+    hidden_message  = ''.join(chr(int(binary_message[i:i+8], 2)) for i in range(0, len(binary_message), 8))
 
     # Return the extracted message
-    return message
+    return hidden_message
 
 
 # Rebuild an image from the modified DCT coefficients after embedding a message
-def rebuild_image_from_dct_color(dct_coefficients, shapes, output_image_path):
+def rebuild_image_from_dct_coefficients(dct_coefficients, channel_shapes, output_image_path):
     # Rebuild an image from the modified DCT coefficients after embedding a message. This function
     # applies the inverse DCT to turn the frequency data back into pixel values and saves the image.
     
@@ -201,28 +201,28 @@ def rebuild_image_from_dct_color(dct_coefficients, shapes, output_image_path):
     # in various formats like JPEG, PNG, and BMP.
 
     # List to store the rebuilt color channels (B, G, R)
-    rebuilt_channels = []
+    rebuilt_color_channels  = []
 
     # Go through each color channel (B, G, R) and rebuild the channel from the DCT coefficients
     for k in range(3):
-        height, width = shapes[k]
+        height, width = channel_shapes[k]
         rebuilt_channel = np.zeros((height, width), dtype=np.float32)
         dct_channel = dct_coefficients[k]
-        block_idx = 0
+        block_index = 0
 
         # Rebuild the channel by applying the inverse DCT to each 8x8 block of DCT coefficients
         for i in range(0, height, 8):
             for j in range(0, width, 8):
-                block = dct_channel[block_idx].astype(np.float32)
-                idct_block = cv2.idct(block)
+                dct_block  = dct_channel[block_index].astype(np.float32)
+                idct_block = cv2.idct(dct_block)
                 rebuilt_channel[i:i+8, j:j+8] = idct_block
-                block_idx += 1
+                block_index  += 1
 
         # Clip the pixel values to the valid range [0, 255] and convert them to unsigned 8-bit integers
-        rebuilt_channels.append(np.clip(rebuilt_channel, 0, 255).astype(np.uint8))
+        rebuilt_color_channels.append(np.clip(rebuilt_channel, 0, 255).astype(np.uint8))
 
     # Merge the rebuilt color channels (B, G, R) to form the final image
-    rebuilt_image = cv2.merge(rebuilt_channels)
+    rebuilt_image = cv2.merge(rebuilt_color_channels)
 
     # Save the rebuilt image using the Pillow library to handle image formats like JPEG
     output_image = Image.fromarray(cv2.cvtColor(rebuilt_image, cv2.COLOR_BGR2RGB))
@@ -256,14 +256,14 @@ print('─' * 20)
 dct_coefficients, image_shapes = extract_dct_color(input_image_path)
 
 # Embed the encrypted message in the DCT coefficients of the blue channel
-modified_dct = embed_data_in_dct(dct_coefficients[0], encrypted_message_str)
+modified_dct = embed_message_in_dct(dct_coefficients[0], encrypted_message_str)
 dct_coefficients[0] = modified_dct
 
 # Rebuild the image from the modified DCT coefficients
-rebuild_image_from_dct_color(dct_coefficients, image_shapes, output_image_path)
+rebuild_image_from_dct_coefficients(dct_coefficients, image_shapes, output_image_path)
 
 # Extract the encrypted message from the modified DCT coefficients
-extracted_encrypted_message_str = extract_data_from_dct(modified_dct, len(encrypted_message_str))
+extracted_encrypted_message_str = extract_hidden_message_from_dct(modified_dct, len(encrypted_message_str))
 
 # Print the extracted encrypted message
 print('─' * 20)
@@ -291,5 +291,8 @@ SOME FUNCTIONALITY OF THIS CODE IS DERIVED FROM EXAMPLE CODE OF LECTORIAL 7
 - Functions Referenced: encrypt_message(), decrypt_message()
 - File Referenced: /L7-code/hybrid_crypto.py 
 - Written and Published by Shekhar Kalra on Canvas
+
+Splitting multi-channel image
+https://www.geeksforgeeks.org/splitting-and-merging-channels-with-python-opencv/ 
 
 """
