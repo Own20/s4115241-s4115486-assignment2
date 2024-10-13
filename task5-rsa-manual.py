@@ -18,6 +18,7 @@ def mod_exp(base, exp, mod):
     return result
 
 # Miller-Rabin primality test for faster prime generation
+# We used Miller_Rabin primality test because the conventional method cost too much time to do calculation
 def miller_rabin_test(n, k=5):
     if n == 2 or n == 3:
         return True
@@ -29,7 +30,7 @@ def miller_rabin_test(n, k=5):
         d //= 2
     for _ in range(k):
         a = random.randint(2, n - 2)
-        x = mod_exp(a, d, n)
+        x = mod_exp(a, d, n) 
         if x == 1 or x == n - 1:
             continue
         for _ in range(r - 1):
@@ -43,8 +44,8 @@ def miller_rabin_test(n, k=5):
 # Generate a large random prime number using Miller-Rabin
 def generate_large_prime(bits=16):
     while True:
-        num = random.getrandbits(bits)
-        if miller_rabin_test(num):
+        num = random.getrandbits(bits) # Using getrandbits to control exactly 16 bits (in this case) of prime number
+        if miller_rabin_test(num): # Pass the number to check if it's prime
             return num
 
 # Function to compute modular inverse using extended Euclidean algorithm
@@ -60,7 +61,7 @@ def mod_inverse(e, phi):
     return x % phi
 
 # RSA key generation with faster prime generation
-def rsa_keygen(bits=64):  # Reduced key size for testing
+def rsa_keygen(bits=64):  # Reduced key size because the larger key size requires longer computation time
     p = generate_large_prime(bits)
     q = generate_large_prime(bits)
     n = p * q
@@ -72,7 +73,7 @@ def rsa_keygen(bits=64):  # Reduced key size for testing
     print('─' * 20)
 
     e = random.randrange(2, phi_n)
-    while gcd(e, phi_n) != 1:
+    while gcd(e, phi_n) != 1: # To ensure e is coprime with phi_n, gcd between them must be 1
         e = random.randrange(2, phi_n)
 
     d = mod_inverse(e, phi_n)
@@ -85,7 +86,7 @@ def add_padding(message, n_len):
     if len(message_bytes) > max_message_len:
         raise ValueError("Message too long for the given modulus")
 
-    padded_message = b'\x00' * (max_message_len - len(message_bytes)) + message_bytes
+    padded_message = b'\x00' * (max_message_len - len(message_bytes)) + message_bytes # Padded message
     return padded_message
 
 # Function to remove padding from the decrypted message
@@ -101,7 +102,7 @@ def rsa_encrypt(message, public_key):
     print(f"Message size (in bytes): {len(message.encode('utf-8'))}")
 
     padded_message = add_padding(message, n_len)
-    message_int = int.from_bytes(padded_message, 'big')
+    message_int = int.from_bytes(padded_message, 'big') # Converts the byte representation of the padded message into an integer
 
     cipher = mod_exp(message_int, e, n)
     return cipher
@@ -109,7 +110,7 @@ def rsa_encrypt(message, public_key):
 # RSA decryption with unpadding
 def rsa_decrypt(cipher, private_key):
     d, n = private_key
-    n_len = (n.bit_length() + 7) // 8
+    n_len = (n.bit_length() + 7) // 8 # Rounding up for the full byte example : (1023 + 7) // 8 = 128 bytes
 
     decrypted_int = mod_exp(cipher, d, n)
     decrypted_bytes = decrypted_int.to_bytes(n_len, 'big')
@@ -120,7 +121,7 @@ def rsa_decrypt(cipher, private_key):
 message = "4115241"
 
 # Generate RSA keys with larger prime numbers (e.g., 128 or 256 bits)
-public_key, private_key = rsa_keygen(bits=128)  # or bits=256 for stronger keys
+public_key, private_key = rsa_keygen(bits=128)  
 
 
 print(f"Public Key: {public_key}")
@@ -144,3 +145,17 @@ with open(encryptedPath, 'w') as f:
 # Save the decrypted message to a file
 with open(decryptedPath, 'w') as f:
     f.write(decrypted_message)
+
+"""
+References:
+
+Miller-Rabin calculation 
+https://www.geeksforgeeks.org/primality-test-set-3-miller-rabin/ 
+For the inverse modulo we took some ideas from this 
+https://www.geeksforgeeks.org/multiplicative-inverse-under-modulo-m/ 
+To specify bits of generated number
+https://www.w3schools.com/python/ref_random_getrandbits.asp 
+For the general RSA encryption, the steps ideas from the week 2 lectorial slide
+For the add_padding part, chatgpt was utilise to help debug the problem
+
+"""
