@@ -295,6 +295,8 @@ Hybrid crypto is utilised in this code and derived from
 Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
 Splitting multi-channel image
 https://www.geeksforgeeks.org/splitting-and-merging-channels-with-python-opencv/ 
+Some other splitting and merging method are inspired from this
+https://pyimagesearch.com/2021/01/23/splitting-and-merging-channels-with-opencv/
 Getting DCT 
 https://stackoverflow.com/questions/15488700/how-to-get-dct-of-an-image-in-python-using-opencv 
 Convert image from one BGR to RGB 
