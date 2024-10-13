@@ -246,9 +246,13 @@ print('─' * 20)
 """
 References:
 
-# P7 rsa_with_signature.py
-# week 6
-# P7 rsa_padding_file.py
-# week 6
+For the signature part in this code, it is derived from 
+Practical week 7 rsa_with_signature.py
+
+For the padding code snippet, it is derived and inspired from 
+week 7 I5 rsa_padding_file.py
+
+For calculating time consumed, we use this website to grab some ideas
+https://docs.python.org/3/library/timeit.html 
 
 """
