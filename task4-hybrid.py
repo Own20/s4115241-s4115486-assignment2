@@ -6,6 +6,12 @@ The program will use a hybrid technique-symmetric (AES) and asymmetric encryptio
 Requirements: the program must display all the keys encrypted and decrypted outputs to the user.
 The RSA keys and decrypted files must be stored in separate files.
 RSA must be used with padding; in other words, textbook RSA is not allowed.
+
+Please install the cryptography library using the following command:
+pip install cryptography
+To install all the required libraries for the program, please run the following command:
+pip install -r "/path/to/requirements.txt"
+Change "/path/to/requirements.txt" to the path of the requirements.txt file in the s4115241-s4115486-assignment2 folder.
 """
 
 # Import required libraries necessary for the program
@@ -28,10 +34,6 @@ def generate_rsa_keys():
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
-<<<<<<< HEAD
-        # backend=default_backend()
-=======
->>>>>>> 70900353c335e106f54c774ec94ea0d8fe9e949b
     )
 
     # Get the public key from the private key
@@ -188,6 +190,7 @@ else:
 
 """
 References:
+
 Some of the code is used from previous practicals.
 The code from line 32 to 40 and 46 to 47 is used from Practical on Week 5, file named "aes_cbc_file.py" from line 64 to 70, and reexplained in Practical on Week 7, file named "aes_cbc_file.py" from line 62 to 68.
 The code from line 30 to 96 is used from Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.

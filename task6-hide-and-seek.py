@@ -1,154 +1,258 @@
+"""
+Note to Marker: Before running the code, aside from the cryptography library, please install the libraries: numpy, Pillow, and opencv-python
+Command: pip install numpy pillow opencv-python
+
+SOME FUNCTIONALITY OF THIS CODE IS DERIVED FROM EXAMPLE CODE OF LECTORIAL 7 
+- Functions Referenced: encrypt_message(), decrypt_message()
+- File Referenced: /L7-code/hybrid_crypto.py 
+- Written and Published by Shekhar Kalra on Canvas
+"""
+
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding
 import numpy as np
 from PIL import Image
-import cv2
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
-from Crypto.Random import get_random_bytes
+import cv2  # OpenCV for working with DCT and inverse DCT
 import os
+from os import urandom
+from base64 import b64encode, b64decode
 
-# AES Encryption with Padding
-def encrypt_message(key, message):
-    cipher = AES.new(key, AES.MODE_CBC)  # AES with CBC mode
-    iv = cipher.iv  # Initialization vector
-    padded_message = pad(message.encode('utf-8'), AES.block_size)  # Pad message
-    encrypted_message = cipher.encrypt(padded_message)
-    return iv + encrypted_message  # IV is needed for decryption
-
-# AES Decryption with Padding
-def decrypt_message(key, encrypted_message):
-    iv = encrypted_message[:AES.block_size]  # Extract the IV
-    encrypted_message = encrypted_message[AES.block_size:]  # Get the actual encrypted message
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    padded_plaintext = cipher.decrypt(encrypted_message)  # Decrypt
-    plaintext = unpad(padded_plaintext, AES.block_size)  # Unpad the decrypted plaintext
-    return plaintext.decode('utf-8')
-
-# Convert message to binary
-def message_to_binary(message):
-    binary_message = ''.join(format(byte, '08b') for byte in message)
-    return binary_message
-
-# Convert binary data to message
-def binary_to_message(binary_data):
-    byte_chunks = [binary_data[i:i+8] for i in range(0, len(binary_data), 8)]
-    message = bytearray([int(byte, 2) for byte in byte_chunks])
-    return message
-
-# Embed the binary message into the image using LSB
-def embed_message_dct(input_image_path, binary_message, output_image_path):
-    # Load image with OpenCV (cv2)
-    img = cv2.imread(input_image_path, cv2.IMREAD_COLOR)
-    height, width, channels = img.shape
-    
-    # Convert image to YCrCb (for DCT)
-    img_ycc = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
-    y_channel, cr_channel, cb_channel = cv2.split(img_ycc)
-
-    # Apply DCT on 8x8 blocks of the Y channel
-    block_size = 8
-    binary_index = 0
-    for i in range(0, height, block_size):
-        for j in range(0, width, block_size):
-            if binary_index >= len(binary_message):
-                break
-            block = y_channel[i:i+block_size, j:j+block_size]
-            dct_block = cv2.dct(np.float32(block))
-            
-            # Modify the DCT coefficients (least significant bit embedding)
-            for m in range(block_size):
-                for n in range(block_size):
-                    if binary_index < len(binary_message):
-                        coeff = dct_block[m, n]
-                        coeff_binary = format(int(coeff), '016b')
-                        # Replace the LSB of the coefficient with the message bit
-                        new_coeff_binary = coeff_binary[:-1] + binary_message[binary_index]
-                        dct_block[m, n] = int(new_coeff_binary, 2)
-                        binary_index += 1
-            
-            # Apply inverse DCT and put the block back
-            y_channel[i:i+block_size, j:j+block_size] = cv2.idct(dct_block)
-
-    # Merge channels and save the output image
-    img_ycc = cv2.merge([y_channel, cr_channel, cb_channel])
-    stego_img = cv2.cvtColor(img_ycc, cv2.COLOR_YCrCb2BGR)
-    cv2.imwrite(output_image_path, stego_img)
-
-# Extract the binary message from the image
-def extract_message_dct(stego_image_path, message_length):
-    # Load the stego image
-    stego_img = cv2.imread(stego_image_path, cv2.IMREAD_COLOR)
-    height, width, channels = stego_img.shape
-    
-    # Convert to YCrCb
-    img_ycc = cv2.cvtColor(stego_img, cv2.COLOR_BGR2YCrCb)
-    y_channel, _, _ = cv2.split(img_ycc)
-    
-    # Extract the message bits from the DCT coefficients
-    binary_message = ''
-    block_size = 8
-    for i in range(0, height, block_size):
-        for j in range(0, width, block_size):
-            if len(binary_message) >= message_length:
-                break
-            block = y_channel[i:i+block_size, j:j+block_size]
-            dct_block = cv2.dct(np.float32(block))
-            
-            for m in range(block_size):
-                for n in range(block_size):
-                    coeff = dct_block[m, n]
-                    coeff_binary = format(int(coeff), '016b')
-                    binary_message += coeff_binary[-1]  # Extract the LSB
-                    
-                    if len(binary_message) >= message_length:
-                        break
-
-    return binary_message
-
-
-# Define base path
+# use BASE to get the file paths in a way that works on any operating system
 BASE = os.path.dirname(os.path.abspath(__file__))
-input_image_path = os.path.join(BASE, "input", "task6_input_image_jpeg.jpeg")
-output_image_path = os.path.join(BASE, "output", "task6_stego_image.jpeg")
-    
-# Define message and encryption key
-secret_message = "s4115241"
-key = get_random_bytes(16)  # AES 128-bit key
-    
-# Step 1: Encrypt the message
-encrypted_message = encrypt_message(key, secret_message)
-print(f"Encrypted message: {encrypted_message}")
-    
-# Step 2: Convert the encrypted message to binary
-binary_message = message_to_binary(encrypted_message)
-print(f"Encrypted message (in binary): {binary_message}")
-    
-# Step 3: Embed the encrypted binary message into the image
-embed_message_dct(input_image_path, binary_message, output_image_path)
-print(f"Message embedded in {output_image_path}")
-    
-# Step 4: Extract the binary message from the stego image
-# Extract the exact number of bits corresponding to the encrypted message
-binary_message_extracted = extract_message_dct(output_image_path, len(binary_message))
-encrypted_message_extracted = binary_to_message(binary_message_extracted)
 
-<<<<<<< HEAD
-# choose message to hide
-# encrypt_message
-# hide embed_message
-# read stego
-# find encrypt message
-# decrypt 
-# print message 
-=======
-# After extraction, print the encrypted message to verify
-print(f"Encrypted message extracted (in binary): {binary_message_extracted}")
-print(f"Encrypted message extracted (in bytes): {encrypted_message_extracted}")
+# AES encryption function
+def aes_encrypt_message(plaintext, key):
+    iv = urandom(16)  # generate a random 16-byte initialization vector (IV)
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
+    encryptor = cipher.encryptor()
+
+    # pad the message to match the AES block size using PKCS7 padding
+    padder = padding.PKCS7(algorithms.AES.block_size).padder()
+    padded_plaintext = padder.update(plaintext.encode()) + padder.finalize()
+
+    # encrypt the padded message
+    ciphertext = encryptor.update(padded_plaintext) + encryptor.finalize()
+
+    # return the IV plus the encrypted message (IV is needed for decryption)
+    return iv + ciphertext
+
+# AES decryption function
+def aes_decrypt_message(ciphertext, key):
+    iv = ciphertext[:16]  # get the IV from the first 16 bytes
+    encrypted_data = ciphertext[16:]  # the rest is the encrypted data
+
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
+    decryptor = cipher.decryptor()
+
+    # decrypt the data
+    padded_message = decryptor.update(encrypted_data) + decryptor.finalize()
+
+    # remove padding from the decrypted message
+    unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+    message = unpadder.update(padded_message) + unpadder.finalize()
+
+    return message.decode()
+
+# function to get DCT coefficients from an image’s color channels
+def extract_dct_color(image_path):
+    """
+    Extract Discrete Cosine Transform (DCT) coefficients from an image's color channels (B, G, R).
+
+    DCT (Discrete Cosine Transform) is a mathematical process that changes data (like image pixels)
+    from the regular image format (spatial domain) into frequency values (frequency domain).
+
+    In JPEG compression, DCT is used to break down 8x8 pixel blocks into frequency values called coefficients.
+    Most of the key visual details are found in the lower frequencies, while higher frequencies are less noticeable 
+    to the human eye. This helps JPEG compress images by removing higher frequency details that don't affect the overall quality as much.
+
+    We use DCT here because JPEG already uses this method for compression, and it is a good spot to hide data in 
+    the low-frequency coefficients without changing the way the image looks too much.
+    """
+    # load the image using OpenCV (in BGR format by default)
+    image = cv2.imread(image_path)
+
+    # split the image into its color channels (Blue, Green, Red)
+    channels = cv2.split(image)
     
-# Step 5: Convert the extracted binary data back to encrypted message
-encrypted_message_extracted = binary_to_message(binary_message_extracted)
-print(f"Encrypted message extracted: {encrypted_message_extracted}")
+    dct_coefficients = []  # list to store the DCT values for each color channel
+    shapes = []  # list to store the size of each channel (height, width)
+
+    # for each color channel, apply the DCT in 8x8 pixel blocks (how JPEG handles compression)
+    for channel in channels:
+        height, width = channel.shape
+        shapes.append(channel.shape)  # store the shape for later use
+        dct_channel = []  # list to hold the DCT coefficients for this channel
+
+        # go through the image in 8x8 pixel blocks
+        for i in range(0, height, 8):
+            for j in range(0, width, 8):
+                block = channel[i:i+8, j:j+8]  # get a small 8x8 block
+                dct_block = cv2.dct(np.float32(block))  # apply DCT to the block
+                dct_channel.append(dct_block)  # save the DCT-transformed block
+        dct_coefficients.append(np.array(dct_channel))  # save all blocks for this channel
+
+    return dct_coefficients, shapes  # return the DCT values and the shapes of each channel
+
+# function to hide a message inside the DCT coefficients
+def embed_data_in_dct(dct_coefficients, message):
+    """
+    Hide a message into the DCT coefficients of an image by altering the least significant bits (LSB) 
+    of the low-frequency DCT values.
+
+    Since the low-frequency DCT coefficients capture most of the important visual details of the image,
+    making slight changes to their least significant bits allows data to be embedded without creating any
+    noticeable changes in the image's appearance.
+
+    By hiding the message in the low-frequency DCT coefficients, it's less likely to be impacted by JPEG's 
+    lossy compression. JPEG typically removes high-frequency DCT values while retaining low-frequency ones 
+    to preserve image quality. Since we are modifying the low-frequency coefficients, the hidden data stays 
+    intact even after the image undergoes JPEG compression.
+
+    This approach is commonly used in JPEG steganography because it ensures that the embedded message 
+    survives compression with minimal visual changes or data loss.
+    """
+    # turn the message into binary (each character becomes an 8-bit binary number)
+    binary_message = ''.join(format(ord(char), '08b') for char in message)
+
+    message_idx = 0  # this tracks where we are in the binary message
+
+    # go through each DCT block
+    for block in dct_coefficients:
+        # only modify the first few low-frequency DCT values (skip the very first one, which is the DC component)
+        for coeff_idx in range(1, min(6, len(block.flatten()))):
+            coeff = np.int32(block.flat[coeff_idx])  # get the current DCT value as an integer
+            
+            if message_idx < len(binary_message):
+                # change the least significant bit (LSB) based on the current bit of the message
+                if binary_message[message_idx] == '1':
+                    coeff = coeff | 1  # set LSB to 1
+                else:
+                    coeff = coeff & ~1  # set LSB to 0
+
+                # put the modified coefficient back into the block
+                block.flat[coeff_idx] = np.float32(coeff)
+                message_idx += 1  # move to the next bit of the message
+
+            # stop if we’ve embedded the whole message
+            if message_idx >= len(binary_message):
+                break
+
+        if message_idx >= len(binary_message):
+            break
+
+    return dct_coefficients  # return the modified DCT coefficients with the hidden message
+
+# function to extract the hidden message from the DCT coefficients
+def extract_data_from_dct(dct_coefficients, message_length):
+    """
+    Extract the hidden message by reading the least significant bits (LSBs) of the low-frequency
+    DCT coefficients.
+    """
+    bits = []  # list to store the extracted bits
+    message_idx = 0  # this tracks how many bits we’ve read
     
-# Step 6: Decrypt the extracted message
-decrypted_message = decrypt_message(key, encrypted_message_extracted)
-print(f"Decrypted message: {decrypted_message}")
->>>>>>> 70900353c335e106f54c774ec94ea0d8fe9e949b
+    # go through each DCT block
+    for block in dct_coefficients:
+        # read the bits from the low-frequency DCT values (skip the first one)
+        for coeff_idx in range(1, min(6, len(block.flatten()))):
+            coeff = np.int32(block.flat[coeff_idx])  # get the DCT value as an integer
+            
+            if message_idx < message_length * 8:  # each character is 8 bits, so message_length * 8 bits total
+                bits.append(coeff & 1)  # extract the least significant bit (LSB)
+                message_idx += 1  # move to the next bit
+
+            # stop if we’ve read enough bits for the message
+            if message_idx >= message_length * 8:
+                break
+
+        if message_idx >= message_length * 8:
+            break
+
+    # convert the bits back to characters (8 bits = 1 byte = 1 character)
+    binary_message = ''.join(str(bit) for bit in bits)
+    message = ''.join(chr(int(binary_message[i:i+8], 2)) for i in range(0, len(binary_message), 8))
+
+    return message  # return the extracted message
+
+# function to rebuild the image after modifying the DCT coefficients
+def rebuild_image_from_dct_color(dct_coefficients, shapes, output_image_path):
+    """
+    Rebuild an image from the modified DCT coefficients after embedding a message. This function
+    applies the inverse DCT to turn the frequency data back into pixel values and saves the image.
+    """
+    rebuilt_channels = []  # list to hold the color channels (B, G, R)
+
+    # go through each of the 3 color channels (Blue, Green, Red)
+    for k in range(3):
+        height, width = shapes[k]  # get the shape of the current channel (height, width)
+        rebuilt_channel = np.zeros((height, width), dtype=np.float32)  # create an empty array for the channel
+        dct_channel = dct_coefficients[k]  # get the DCT coefficients for this channel
+        block_idx = 0  # track the block index
+
+        # go through the DCT blocks and apply inverse DCT to rebuild the channel
+        for i in range(0, height, 8):
+            for j in range(0, width, 8):
+                block = dct_channel[block_idx].astype(np.float32)  # make sure the block is in float32 format
+                idct_block = cv2.idct(block)  # apply inverse DCT to convert back to pixel values
+                rebuilt_channel[i:i+8, j:j+8] = idct_block  # place the rebuilt block into the channel
+                block_idx += 1
+
+        # clip the values to the valid pixel range [0, 255] and convert to uint8 (standard pixel format)
+        rebuilt_channels.append(np.clip(rebuilt_channel, 0, 255).astype(np.uint8))
+
+    # merge the color channels back into a BGR image
+    rebuilt_image = cv2.merge(rebuilt_channels)
+
+    # convert BGR to RGB (because OpenCV uses BGR by default) and save the image using Pillow
+    output_image = Image.fromarray(cv2.cvtColor(rebuilt_image, cv2.COLOR_BGR2RGB))
+    output_image.save(output_image_path)  # save the image
+    print(f"Stego image saved to {output_image_path}")
+
+
+# define input and output paths using the BASE variable (works on any operating system)
+input_image_path = os.path.join(BASE, 'input', 'task6_input_image.jpeg')
+output_image_path = os.path.join(BASE, 'output', 'task6_stego_image.jpeg')
+
+# get the secret message from the user
+original_message = input("\nEnter the secret message you want to hide (Example: Today is a great day): ")
+
+# generate a random 256-bit AES key (32 bytes)
+key = urandom(32)
+
+# encrypt the message using AES encryption
+encrypted_message = aes_encrypt_message(original_message, key)
+
+# convert the encrypted message to base64 so it can be embedded as text
+encrypted_message_str = b64encode(encrypted_message).decode('utf-8')
+
+# Print the encrypted message in base64 string
+print('─' * 20)
+print(f"Encrypted Message: {encrypted_message_str}")
+print('─' * 20)
+print(f"Generating Stego Image... Please wait a moment as this process may take a while...\n")
+print('─' * 20)
+# extract DCT coefficients from the color channels of the input image
+dct_coefficients, image_shapes = extract_dct_color(input_image_path)
+
+# embed the encrypted message into the DCT coefficients of the blue channel
+modified_dct = embed_data_in_dct(dct_coefficients[0], encrypted_message_str)
+dct_coefficients[0] = modified_dct  # Update DCT coefficients of the blue channel
+
+# rebuild the image with the modified DCT coefficients and save it
+rebuild_image_from_dct_color(dct_coefficients, image_shapes, output_image_path)
+
+# extract the hidden encrypted message from the blue channel
+extracted_encrypted_message_str = extract_data_from_dct(modified_dct, len(encrypted_message_str))
+
+# Print the extracted encrypted message (Base64)
+print('─' * 20)
+print(f"Extracted Encrypted Message: {extracted_encrypted_message_str}")
+print('─' * 20)
+# decode the extracted message from base64 back to bytes
+extracted_encrypted_message = b64decode(extracted_encrypted_message_str)
+
+# decrypt the extracted encrypted message
+decrypted_message = aes_decrypt_message(extracted_encrypted_message, key)
+print('─' * 20)
+print(f"Decrypted Message: {decrypted_message}")
+print('─' * 20)
