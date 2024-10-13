@@ -59,18 +59,8 @@ def decryptMessage(ciphertext, key):
     # Decode the plaintext from bytes to string using UTF-8 encoding
     return message.decode('utf-8')
 
-# Extract DCT coefficients from an image's color channels (B, G, R)
+# Extract DCT coefficients from an image's color channels (Blue, Green, Red)
 def extract_dct_color(image_path):
-    
-    # Extract Discrete Cosine Transform (DCT) coefficients from an image's color channels (B, G, R).
-    # DCT (Discrete Cosine Transform) is a mathematical process that changes data (like image pixels)
-    # from the regular image format (spatial domain) into frequency values (frequency domain).
-    # In JPEG compression, DCT is used to break down 8x8 pixel blocks into frequency values called coefficients.
-    # Most of the key visual details are found in the lower frequencies, while higher frequencies are less noticeable 
-    # to the human eye. This helps JPEG compress images by removing higher frequency details that don't affect the overall quality as much.
-    # We use DCT here because JPEG already uses this method for compression, and it is a good spot to hide data in 
-    # the low-frequency coefficients without changing the way the image looks too much.
-    
     # Read the image using OpenCV
     image = cv2.imread(image_path)
 
@@ -87,6 +77,7 @@ def extract_dct_color(image_path):
         channel_shapes .append(channel.shape)
         dct_channel = []
 
+        # Extract DCT coefficients for each 8x8 block of pixels in the channel
         for i in range(0, height, 8):
             for j in range(0, width, 8):
                 pixel_block = channel[i:i+8, j:j+8]
@@ -99,21 +90,6 @@ def extract_dct_color(image_path):
 
 # Embed the message in the DCT coefficients
 def embed_message_in_dct(dct_coefficients, secret_message):
-    # Hide a message into the DCT coefficients of an image by altering the least significant bits (LSB) 
-    # of the low-frequency DCT values.
-
-    # Since the low-frequency DCT coefficients capture most of the important visual details of the image,
-    # making slight changes to their least significant bits allows data to be embedded without creating any
-    # noticeable changes in the image's appearance.
-
-    # By hiding the message in the low-frequency DCT coefficients, it's less likely to be impacted by JPEG's 
-    # lossy compression. JPEG typically removes high-frequency DCT values while retaining low-frequency ones 
-    # to preserve image quality. Since we are modifying the low-frequency coefficients, the hidden data stays 
-    # intact even after the image undergoes JPEG compression.
-
-    # This approach is commonly used in JPEG steganography because it ensures that the embedded message 
-    # survives compression with minimal visual changes or data loss.
-
     # Convert the message to binary format
     binary_secret_message = ''.join(format(ord(char), '08b') for char in secret_message)
 
@@ -149,15 +125,6 @@ def embed_message_in_dct(dct_coefficients, secret_message):
 
 # Extract the hidden message from the DCT coefficients
 def extract_hidden_message_from_dct(dct_coefficients, secret_message_length):
-    # Extract the hidden message by reading the least significant bits (LSBs) of the low-frequency DCT coefficients.
-
-    # Since the message is embedded in the least significant bits of the low-frequency DCT values, we can extract it
-    # by reading these bits and converting them back to characters.
-
-    # By extracting the message from the low-frequency DCT coefficients, we can recover the hidden data without
-    # affecting the image's visual quality. This method is effective because the low-frequency DCT values contain
-    # important visual information that is less likely to be altered during compression or editing.
-    
     # List to store the extracted bits and the index of the current bit in the message
     extracted_bits  = []
     bit_index  = 0
@@ -191,15 +158,6 @@ def extract_hidden_message_from_dct(dct_coefficients, secret_message_length):
 
 # Rebuild an image from the modified DCT coefficients after embedding a message
 def rebuild_image_from_dct_coefficients(dct_coefficients, channel_shapes, output_image_path):
-    # Rebuild an image from the modified DCT coefficients after embedding a message. This function
-    # applies the inverse DCT to turn the frequency data back into pixel values and saves the image.
-    
-    # The process involves going through the DCT coefficients of each color channel (B, G, R), applying the inverse DCT
-    # to convert the frequency data back to pixel values, and merging the color channels to reconstruct the image.
-
-    # The rebuilt image is saved to the specified output path using the Pillow library, which supports saving images
-    # in various formats like JPEG, PNG, and BMP.
-
     # List to store the rebuilt color channels (B, G, R)
     rebuilt_color_channels  = []
 
@@ -287,20 +245,24 @@ print('─' * 20)
 """
 References:
 
-SOME FUNCTIONALITY OF THIS CODE IS DERIVED FROM EXAMPLE CODE OF LECTORIAL 7 
-- Functions Referenced: encrypt_message(), decrypt_message()
-- File Referenced: /L7-code/hybrid_crypto.py 
-- Written and Published by Shekhar Kalra on Canvas
 Hybrid crypto is utilised in this code and derived from 
 Lectorial on Week 7, file named "hybrid_crypto.py" from line 13 to 64, and reexplained in Practical on Week 8, file named "hybrid_crypto.py" from line 13 to 66.
+
+The Discrete Cosine Transform (DCT) steganography mathematical process allows for hiding a secret message within an image by manipulating the Discrete Cosine Transform (DCT) coefficients of the image. This technique uses the way JPEG images are compressed and how the human eye perceives changes in image data. The process can be done using these steps:
+- Extract the DCT coefficients from the image's color channels from the spatial domain (the normal pixel values of the image) into the frequency domain (the DCT coefficients). It categorises the image data into different frequencies, with the low-frequency coefficients are ideal for data embedding since small alterations have minimal visual impact.
+- Embed the secret message into the low-frequency DCT coefficients by modifying the least significant bits (LSBs) of the coefficients. This process involves changing the LSBs of the DCT values to encode the message bits without significantly altering the image's appearance. This technique ensures that the hidden message can survive JPEG compression, which tends to remove high-frequency details while retaining low-frequency components.
+- Extract the hidden message from the DCT coefficients by reading the LSBs of the low-frequency DCT values. This process involves decoding the LSBs to recover the embedded message without affecting the image's quality. The effectiveness of this method relies on the ability to recover hidden data from the low-frequency components, which are less likely to change during image processing.
+- Rebuild the image from the modified DCT coefficients by applying the inverse DCT to convert the frequency data back into pixel values. This step merges the color channels to reconstruct the image with the embedded message.
+
 Splitting multi-channel image
 https://www.geeksforgeeks.org/splitting-and-merging-channels-with-python-opencv/ 
+
 Some other splitting and merging method are inspired from this
 https://pyimagesearch.com/2021/01/23/splitting-and-merging-channels-with-opencv/
+
 Getting DCT 
 https://stackoverflow.com/questions/15488700/how-to-get-dct-of-an-image-in-python-using-opencv 
-More about DCT and IDCT ideas are from
-https://www.tutorialspoint.com/how-to-find-discrete-cosine-transform-of-an-image-using-opencv-python
+
 Convert image from one BGR to RGB 
 https://www.geeksforgeeks.org/python-opencv-cv2-cvtcolor-method/ 
 
