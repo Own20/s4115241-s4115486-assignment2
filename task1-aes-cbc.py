@@ -85,7 +85,7 @@ def decryptFile(inputFilePath, outputFilePath, password):
 
 
 # Run the program using the input file task1.txt and password 'password' to encrypt and decrypt the file and display the key, encrypted and decrypted output to the user.
-# File paths
+# Define the paths for the input, encrypted, and decrypted files
 inputPath = os.path.join(BASE, 'input', 'task1.txt')
 encryptedPath = os.path.join(BASE, 'output', 'task1_enc')
 decryptedPath = os.path.join(BASE, 'output', 'task1_dec')

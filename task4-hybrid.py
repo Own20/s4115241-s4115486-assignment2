@@ -96,7 +96,7 @@ def decrypt_message(encrypted_message, iv, encrypted_key, private_key):
     # Return the decrypted message
     return decrypted_message.decode()
 
-# These are the paths to the files
+# Define the paths for the files
 plain_text_path = os.path.join(BASE, "input", "task1.txt")
 encrypted_file_path = os.path.join(BASE, "output", "task4_enc")
 decrypted_file_path = os.path.join(BASE, "output", "task4_dec")
